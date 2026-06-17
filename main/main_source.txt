@@ -35,8 +35,8 @@ extern const char    index_html_start[]    asm("_binary_index_html_start");
 extern const char    index_html_end[]      asm("_binary_index_html_end");
 extern const char    sobre_html_start[]    asm("_binary_sobre_html_start");
 extern const char    sobre_html_end[]      asm("_binary_sobre_html_end");
-extern const char    main_source_txt_start[] asm("_binary_main_source_txt_start");
-extern const char    main_source_txt_end[]   asm("_binary_main_source_txt_end");
+extern const char    main_src_txt_start[]  asm("_binary_main_src_txt_start");
+extern const char    main_src_txt_end[]    asm("_binary_main_src_txt_end");
 extern const uint8_t card1_jpg_start[]     asm("_binary_card1_jpg_start");
 extern const uint8_t card1_jpg_end[]       asm("_binary_card1_jpg_end");
 extern const uint8_t card2_jpg_start[]     asm("_binary_card2_jpg_start");
@@ -253,7 +253,7 @@ static esp_err_t codigo_handler(httpd_req_t *req)
     httpd_resp_send_chunk(req, hdr, HTTPD_RESP_USE_STRLEN);
 
     /* Envia main.c escapando caracteres HTML */
-    const char *p = main_source_txt_start, *end = main_source_txt_end;
+    const char *p = main_src_txt_start, *end = main_src_txt_end;
     char buf[512]; int bi = 0;
     while (p < end) {
         char c = *p++;

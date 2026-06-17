@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sobre – Aferidor de Pneus</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;color:#002873;}
+
+header{text-align:center;background:#041e64;color:#fff;padding:40px 20px 16px;font-style:italic;}
+header h1{font-size:1.8rem;margin-bottom:10px;letter-spacing:2px;}
+.menu{display:flex;justify-content:center;gap:30px;font-size:17px;}
+.menu a{color:#fff;text-decoration:none;}
+.menu a:hover{color:#ffd700;}
+
+/* ── Cards ── */
+.card{display:flex;align-items:center;gap:50px;padding:60px 10%;}
+.card-imagem{flex:1;}
+.card-imagem img{width:100%;border-radius:15px;transition:0.3s;}
+.card-imagem img:hover{transform:scale(1.03);}
+.texto{flex:1;font-size:18px;line-height:1.6;text-align:justify;}
+.texto h2{color:#1E4FA1;font-size:2rem;margin-bottom:20px;font-style:italic;}
+.texto h3{margin:20px 0 10px;}
+.texto p{margin-bottom:15px;line-height:1.7;}
+.reverso{flex-direction:row-reverse;}
+@media(max-width:768px){.card,.reverso{flex-direction:column;}.card{padding:40px 5%;}}
+
+/* ── Galeria ── */
+.tipo{display:flex;justify-content:center;gap:50px;margin:40px 0;flex-wrap:wrap;}
+.foto{overflow:hidden;border-radius:15px;}
+.foto img{width:350px;height:350px;object-fit:cover;transition:0.4s;border:4px solid #1E4FA1;border-radius:15px;}
+.foto img:hover{transform:scale(1.1);}
+figure{margin:0;text-align:center;}
+figcaption{margin-top:8px;font-size:16px;font-weight:bold;color:#041e64;}
+
+/* ── Conversor ── */
+.conversao{width:60%;margin:50px auto;padding:30px;background:#fff;border-radius:15px;box-shadow:0 0 10px rgba(0,0,0,.1);}
+.conversao h2{color:#1E4FA1;margin-bottom:20px;font-style:italic;}
+.conversao form{display:flex;flex-direction:column;gap:15px;}
+.conversao input,.conversao select{padding:10px;font-size:16px;border:1px solid #ccc;border-radius:6px;}
+.conversao button{padding:12px;background:#041e64;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:16px;}
+.conversao button:hover{background:rgb(9,132,2);}
+#resultado{margin-top:20px;color:#041e64;font-size:1.2rem;}
+@media(max-width:768px){.conversao{width:90%;}}
+
+/* ── Sobre o Projeto ── */
+.box{max-width:860px;margin:44px auto;background:#fff;border-radius:15px;padding:40px;box-shadow:0 2px 14px rgba(0,0,0,.09);}
+.box h2{color:#1E4FA1;font-size:1.5rem;font-style:italic;margin-bottom:14px;}
+.box p{line-height:1.75;font-size:16px;text-align:justify;margin-bottom:14px;}
+.box strong{color:#041e64;}
+.box code{background:#eef2ff;border:1px solid #c5d3f7;border-radius:4px;padding:1px 7px;font-size:14px;color:#1E4FA1;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 20px;}
+.chip{background:#eef2ff;border:1px solid #c5d3f7;border-radius:6px;padding:4px 12px;font-size:13px;color:#1E4FA1;font-weight:bold;}
+.steps{background:#f8f9ff;border:1px solid #dde4f5;border-radius:10px;padding:20px 24px;margin-top:10px;}
+.steps p{margin-bottom:10px;font-size:16px;line-height:1.6;}
+.steps p:last-child{margin-bottom:0;}
+
+footer{text-align:center;padding:18px;background:#041e64;color:#5577aa;font-size:12px;margin-top:44px;}
+
+.section-title{text-align:center;color:#041e64;font-size:2rem;font-style:italic;padding:40px 10% 10px;border-top:3px solid #1E4FA1;margin-top:20px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AFERIDOR DE PNEUS</h1>
+  <nav><div class="menu">
+    <a href="/">Sobre</a>
+    <a href="/codigo">C&#243;digo</a>
+    <a href="/medidor">Medidor ao Vivo</a>
+  </div></nav>
+</header>
+
+<!-- ── SOBRE O PROJETO ── -->
+<section class="box">
+  <h2>Sobre o Projeto</h2>
+  <p>O <strong>Aferidor de Pneus Digital</strong> combina um sensor de pressão <strong>SMP3011</strong> com um microcontrolador <strong>ESP32</strong>. O ESP32 lê os dados do sensor via protocolo <strong>I&sup2;C</strong> e os disponibiliza em uma interface web acessível em tempo real.</p>
+  <p>A medição é transmitida continuamente via <strong>WebSocket</strong>, atualizando o gauge animado no navegador sem necessidade de recarregar a página. O conversor de unidades (PSI, BAR, kPa) do projeto original foi mantido.</p>
+
+  <h2 style="margin-top:24px;">Tecnologias</h2>
+  <div class="chips">
+    <span class="chip">ESP32</span>
+    <span class="chip">ESP-IDF 5.x</span>
+    <span class="chip">SMP3011</span>
+    <span class="chip">I&sup2;C</span>
+    <span class="chip">WiFi SoftAP</span>
+    <span class="chip">WebSocket</span>
+    <span class="chip">HTML5</span>
+    <span class="chip">CSS3</span>
+    <span class="chip">JavaScript</span>
+    <span class="chip">Canvas API</span>
+  </div>
+
+  <h2>Como Acessar</h2>
+  <div class="steps">
+    <p>1. Ligue o ESP32 — ele criará uma rede WiFi automaticamente.</p>
+    <p>2. Conecte seu celular ou PC à rede <strong>"Aferidor_Pneus"</strong>&nbsp;(senha: <code>smp3011esp</code>).</p>
+    <p>3. Abra o navegador e acesse <strong>http://192.168.4.1</strong></p>
+    <p>4. O gauge ao vivo aparecerá e começará a medir automaticamente.</p>
+  </div>
+</section>
+
+<!-- ── O QUE É ── -->
+<h2 class="section-title">O QUE É UM AFERIDOR?</h2>
+
+<section class="card">
+  <div class="card-imagem"><img src="/card1.jpg" alt="Aferidor de pneus"></div>
+  <div class="texto">
+    <h2>O QUE É?</h2>
+    <p>O aferidor de pneus (também chamado de manômetro ou medidor) é um equipamento essencial para verificar a pressão interna e a profundidade dos sulcos (desgaste).<br>Ele garante a segurança e a economia do veículo ao manter os pneus dentro dos padrões ideais de rodagem.</p>
+    <h3>O que ele mede:</h3>
+    <p><strong>Pressão do ar:</strong> Garante que o pneu não esteja murcho ou cheio demais.</p>
+    <p><strong>Profundidade dos sulcos:</strong> Mede o desgaste da borracha para evitar riscos de derrapagem.</p>
+  </div>
+</section>
+
+<section class="card reverso">
+  <div class="card-imagem"><img src="/card2.jpg" alt="Calibragem"></div>
+  <div class="texto">
+    <h2>POR QUE É IMPORTANTE?</h2>
+    <p>O uso correto do aferidor ajuda a manter a segurança e aumenta a vida útil dos pneus.</p>
+    <h3>Benefícios</h3>
+    <p><strong>Segurança:</strong> Pneus bem calibrados e com sulcos profundos evitam a aquaplanagem na chuva.<br>
+       <strong>Economia:</strong> A pressão correta diminui o consumo de combustível e evita o desgaste irregular do pneu.<br>
+       <strong>Multas:</strong> A lei exige que os sulcos tenham pelo menos 1,6 mm de profundidade.</p>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-imagem"><img src="/card3.jpg" alt="Tipos de aferidor"></div>
+  <div class="texto">
+    <h2>TIPOS DE AFERIDORES:</h2>
+    <p>Existem diversos modelos disponíveis no mercado.</p>
+    <p><strong>Analógicos:</strong> Modelos tradicionais com ponteiros, que exigem anotações em papel.<br>
+       <strong>Digitais:</strong> Equipamentos com tela de LCD que mostram o valor exato da medição de forma rápida.<br>
+       <strong>Eletrônicos (Smart):</strong> Aparelhos portáteis que enviam os dados de pressão e desgaste diretamente para o celular via Bluetooth.</p>
+  </div>
+</section>
+
+<!-- ── GALERIA ── -->
+<section class="tipo">
+  <div class="foto">
+    <figure><img src="/analogico.jpg" alt="Analógico"><figcaption>Analógico</figcaption></figure>
+  </div>
+  <div class="foto">
+    <figure><img src="/digital.png" alt="Digital"><figcaption>Digital</figcaption></figure>
+  </div>
+  <div class="foto">
+    <figure><img src="/eletronico.jpg" alt="Eletrônico"><figcaption>Eletrônico</figcaption></figure>
+  </div>
+</section>
+
+<!-- ── CONVERSOR ── -->
+<section class="conversao">
+  <h2>Conversor de Pressão dos Pneus</h2>
+  <form>
+    <label for="valor">Valor:</label>
+    <input type="number" id="valor" placeholder="Digite o valor">
+    <label for="origem">De:</label>
+    <select id="origem">
+      <option value="PSI">PSI</option>
+      <option value="BAR">BAR</option>
+      <option value="KPA">kPa</option>
+    </select>
+    <label for="destino">Para:</label>
+    <select id="destino">
+      <option value="PSI">PSI</option>
+      <option value="BAR">BAR</option>
+      <option value="KPA">kPa</option>
+    </select>
+    <button type="button" onclick="converter()">Converter</button>
+  </form>
+  <h3 id="resultado"></h3>
+</section>
+
+<footer>Aferidor de Pneus &mdash; ESP32 + SMP3011 &copy; 2025</footer>
+
+<script>
+function converter(){
+  var valor = parseFloat(document.getElementById("valor").value);
+  var origem = document.getElementById("origem").value;
+  var destino = document.getElementById("destino").value;
+  if(isNaN(valor)){alert("Preencha o valor antes de converter.");return;}
+  if(origem==="BAR") valor=valor*14.5038;
+  else if(origem==="KPA") valor=valor*0.145038;
+  var resultado;
+  if(destino==="BAR") resultado=valor*0.06895;
+  else if(destino==="KPA") resultado=valor*6.89476;
+  else resultado=valor;
+  document.getElementById("resultado").innerHTML="Resultado: "+resultado.toFixed(2)+" "+destino;
+}
+</script>
+</body>
+</html>

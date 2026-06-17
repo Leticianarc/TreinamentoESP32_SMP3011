@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aferidor de Pneus – SMP3011</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;color:#002873;}
+
+/* HEADER */
+header{text-align:center;background:#041e64;color:#fff;padding:28px 20px 16px;font-style:italic;}
+header h1{font-size:1.8rem;margin-bottom:10px;letter-spacing:2px;}
+.menu{display:flex;justify-content:center;gap:30px;font-size:17px;}
+.menu a{color:#fff;text-decoration:none;}
+.menu a:hover{color:#ffd700;}
+
+/* SEÇÃO DO GAUGE (TEMA ESCURO TIPO PAINEL) */
+.live-section{
+  background:linear-gradient(160deg,#080e28 0%,#0d1b4b 60%,#0a1235 100%);
+  padding:36px 20px 32px;
+  text-align:center;
+}
+.live-section h2{
+  color:#7eb3ff;font-size:1.3rem;letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:5px;
+}
+.status-bar{
+  display:flex;align-items:center;justify-content:center;
+  gap:8px;margin-bottom:18px;font-size:13px;color:#6688bb;
+}
+#sdot{
+  width:9px;height:9px;border-radius:50%;
+  background:#333;transition:background .4s,box-shadow .4s;
+}
+#sdot.on {background:#00e676;box-shadow:0 0 10px #00e676,0 0 20px #00e676;}
+#sdot.off{background:#ff1744;box-shadow:0 0 8px #ff1744;}
+
+#gc{display:block;margin:0 auto;max-width:100%;}
+
+/* CARDS DE LEITURA */
+.reading-grid{
+  display:flex;justify-content:center;flex-wrap:wrap;
+  gap:10px;margin-top:20px;
+}
+.rcard{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(100,150,255,0.2);
+  border-radius:12px;padding:10px 18px;min-width:86px;text-align:center;
+  transition:border-color .3s;
+}
+.rcard:hover{border-color:rgba(100,150,255,0.5);}
+.rcard .ru{font-size:10px;color:#7eb3ff;font-weight:bold;letter-spacing:1px;}
+.rcard .rv{font-size:1.35rem;font-weight:bold;color:#e8f0ff;margin-top:4px;}
+.rcard.main-r{border-color:#4d9fff;background:rgba(77,159,255,0.1);}
+.rcard.main-r .rv{color:#7eb3ff;font-size:1.6rem;}
+
+/* TEMPERATURA E STATUS */
+.temp-row{color:#8aaadd;font-size:14px;margin-top:14px;}
+.temp-row span{color:#ff8a65;font-weight:bold;font-size:1.1rem;}
+.pstatus{
+  display:inline-block;margin-top:14px;
+  padding:6px 22px;border-radius:20px;
+  font-size:.95rem;font-weight:bold;letter-spacing:.5px;
+  transition:all .4s;border:1px solid transparent;
+}
+
+/* EXPLICAÇÃO */
+.explicacao{
+  width:70%;margin:44px auto;padding:36px;
+  background:#fff;border-radius:15px;
+  box-shadow:0 2px 14px rgba(0,0,0,.09);
+}
+.explicacao h2{color:#1E4FA1;font-size:1.4rem;font-style:italic;margin-bottom:20px;text-align:center;}
+.explicacao p{font-size:16px;line-height:1.75;color:#002873;margin-bottom:16px;text-align:justify;}
+.explicacao strong{color:#041e64;}
+.zonas{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0;}
+.zona{
+  flex:1;min-width:120px;padding:10px 14px;border-radius:10px;
+  text-align:center;font-size:14px;font-weight:bold;
+}
+.zona .faixa{font-size:1rem;margin-bottom:4px;}
+.zona .desc{font-size:12px;font-weight:normal;margin-top:4px;}
+@media(max-width:600px){.explicacao{width:92%;}}
+
+footer{
+  text-align:center;padding:18px;
+  background:#041e64;color:#5577aa;font-size:12px;margin-top:44px;
+}
+
+@media(max-width:600px){
+  .conversao{width:92%;}
+  .rcard{min-width:70px;padding:8px 10px;}
+  header h1{font-size:1.4rem;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AFERIDOR DE PNEUS</h1>
+  <nav><div class="menu">
+    <a href="/">Sobre</a>
+    <a href="/codigo">C&#243;digo</a>
+    <a href="/medidor">Medidor ao Vivo</a>
+  </div></nav>
+</header>
+
+<!-- GAUGE AO VIVO -->
+<section class="live-section">
+  <h2>Pressão em Tempo Real</h2>
+  <div class="status-bar">
+    <div id="sdot"></div>
+    <span id="stxt">Conectando ao ESP32...</span>
+  </div>
+
+  <canvas id="gc" width="420" height="280"></canvas>
+
+  <div class="reading-grid">
+    <div class="rcard main-r"><div class="ru">PSI</div><div class="rv" id="vpsi">--</div></div>
+    <div class="rcard"><div class="ru">BAR</div><div class="rv" id="vbar">--</div></div>
+    <div class="rcard"><div class="ru">kPa</div><div class="rv" id="vkpa">--</div></div>
+    <div class="rcard"><div class="ru">Pa</div><div class="rv" id="vpa">--</div></div>
+  </div>
+
+  <div class="temp-row">Temperatura: <span id="vtmp">--</span>&nbsp;°C</div>
+  <div class="pstatus" id="pst"></div>
+</section>
+
+<!-- EXPLICAÇÃO DO MEDIDOR -->
+<section class="explicacao">
+  <h2>Como funciona o Medidor?</h2>
+
+  <p>O medidor acima é um <strong>gauge circular animado</strong> que exibe em tempo real a pressão lida pelo sensor <strong>SMP3011</strong>, conectado ao <strong>ESP32</strong> via protocolo <strong>I²C</strong>. Os dados chegam ao navegador automaticamente a cada <strong>150 ms</strong> por meio de uma conexão <strong>WebSocket</strong> — sem precisar recarregar a página.</p>
+
+  <p>O ponteiro gira de <strong>0 a 60 PSI</strong> e a faixa colorida ao redor do arco indica a situação da pressão do pneu:</p>
+
+  <div class="zonas">
+    <div class="zona" style="background:#fde8e8;color:#c62828;">
+      <div class="faixa">0 – 20 PSI</div>
+      <div style="font-size:1.4rem;">&#128308;</div>
+      <div class="desc">Pneu murcho — perigo de dano ao aro</div>
+    </div>
+    <div class="zona" style="background:#fff3e0;color:#e65100;">
+      <div class="faixa">20 – 28 PSI</div>
+      <div style="font-size:1.4rem;">&#128992;</div>
+      <div class="desc">Pressão baixa — calibrar em breve</div>
+    </div>
+    <div class="zona" style="background:#e8f5e9;color:#2e7d32;">
+      <div class="faixa">28 – 36 PSI</div>
+      <div style="font-size:1.4rem;">&#128994;</div>
+      <div class="desc">Pressão ideal — seguro para rodagem</div>
+    </div>
+    <div class="zona" style="background:#fff3e0;color:#e65100;">
+      <div class="faixa">36 – 45 PSI</div>
+      <div style="font-size:1.4rem;">&#128992;</div>
+      <div class="desc">Pressão alta — verificar calibragem</div>
+    </div>
+    <div class="zona" style="background:#fde8e8;color:#c62828;">
+      <div class="faixa">45 – 60 PSI</div>
+      <div style="font-size:1.4rem;">&#128308;</div>
+      <div class="desc">Pressão perigosa — risco de estouro</div>
+    </div>
+  </div>
+
+  <p>Abaixo do arco são exibidos os valores em quatro unidades simultaneamente: <strong>PSI</strong> (padrão americano), <strong>BAR</strong> (padrão europeu), <strong>kPa</strong> (Sistema Internacional) e <strong>Pa</strong> (valor bruto do sensor). A <strong>temperatura</strong> interna do sensor também é monitorada em °C.</p>
+
+  <p>O ponto colorido no topo da página indica o estado da conexão: <strong style="color:#00aa55;">verde</strong> quando o ESP32 está transmitindo dados e <strong style="color:#ff1744;">vermelho</strong> quando a conexão foi perdida — neste caso o sistema tenta reconectar automaticamente a cada 3 segundos.</p>
+</section>
+
+<footer>Aferidor de Pneus &mdash; ESP32 + SMP3011 &copy; 2025</footer>
+
+<script>
+// ── GAUGE (Canvas API) ────────────────────────────────────────────────
+const cv  = document.getElementById('gc');
+const ctx = cv.getContext('2d');
+const CX=210, CY=238, R=158, RMIN=112;
+const SA   = Math.PI * 0.75;   // 135°
+const SPAN = Math.PI * 1.5;    // 270°
+const MAXPSI = 60;
+
+let curPsi = 0, tgtPsi = 0, raf = null;
+
+function p2a(psi) {
+  return SA + (Math.max(0, Math.min(MAXPSI, psi)) / MAXPSI) * SPAN;
+}
+
+function arcStrip(fromPsi, toPsi, color) {
+  ctx.beginPath();
+  ctx.arc(CX, CY, (R + RMIN) / 2, p2a(fromPsi), p2a(toPsi), false);
+  ctx.lineWidth = R - RMIN;
+  ctx.strokeStyle = color;
+  ctx.lineCap = 'butt';
+  ctx.stroke();
+}
+
+function drawGauge(psi) {
+  ctx.clearRect(0, 0, cv.width, cv.height);
+
+  // Anel de fundo
+  ctx.beginPath();
+  ctx.arc(CX, CY, (R + RMIN) / 2, SA, SA + SPAN, false);
+  ctx.lineWidth = R - RMIN;
+  ctx.strokeStyle = '#111b3a';
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Zonas de cor (PSI para pneus de carro comum)
+  arcStrip(0,  20, '#c62828'); // vermelho – murcho
+  arcStrip(20, 28, '#e65100'); // laranja  – baixo
+  arcStrip(28, 36, '#2e7d32'); // verde    – ideal
+  arcStrip(36, 45, '#e65100'); // laranja  – alto
+  arcStrip(45, 60, '#c62828'); // vermelho – perigoso
+
+  // Brilho sobre a zona ativa
+  const glowColor = psi < 20 ? '#ff5252' : psi <= 28 ? '#ff9100' :
+                    psi <= 36 ? '#69f0ae' : psi <= 45 ? '#ff9100' : '#ff5252';
+  ctx.save();
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = glowColor;
+  arcStrip(0, Math.min(psi, MAXPSI), glowColor);
+  ctx.restore();
+
+  // Marcações de escala
+  for (let t = 0; t <= MAXPSI; t += 5) {
+    const a   = p2a(t);
+    const co  = Math.cos(a), si = Math.sin(a);
+    const maj = (t % 10 === 0);
+    ctx.beginPath();
+    ctx.moveTo(CX + (RMIN - 3) * co, CY + (RMIN - 3) * si);
+    ctx.lineTo(CX + (RMIN + 5 + (maj ? 6 : 2)) * co,
+               CY + (RMIN + 5 + (maj ? 6 : 2)) * si);
+    ctx.lineWidth   = maj ? 2 : 1;
+    ctx.strokeStyle = maj ? '#b0c8ff' : '#3a4f70';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    if (maj) {
+      ctx.fillStyle    = '#8ab0e8';
+      ctx.font         = 'bold 12px Arial';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      const lr = RMIN - 17;
+      ctx.fillText(t, CX + lr * co, CY + lr * si);
+    }
+  }
+
+  // Display digital central
+  ctx.beginPath();
+  ctx.arc(CX, CY, RMIN - 8, 0, Math.PI * 2);
+  ctx.fillStyle = '#070c1e';
+  ctx.fill();
+
+  // Valor em PSI grande
+  ctx.fillStyle    = '#e8f4ff';
+  ctx.font         = 'bold 40px Arial';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(psi.toFixed(1), CX, CY - 16);
+
+  ctx.font      = '12px Arial';
+  ctx.fillStyle = '#4d88cc';
+  ctx.fillText('PSI', CX, CY + 13);
+
+  // Ponteiro triangular
+  const na  = p2a(psi);
+  const nco = Math.cos(na), nsi = Math.sin(na);
+  const NR  = R - 6;
+  ctx.save();
+  ctx.shadowBlur  = 14;
+  ctx.shadowColor = 'rgba(180,210,255,0.9)';
+  ctx.beginPath();
+  ctx.moveTo(CX - 9 * nsi,     CY + 9 * nco);
+  ctx.lineTo(CX + NR * nco,    CY + NR * nsi);
+  ctx.lineTo(CX + 9 * nsi,     CY - 9 * nco);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(220,235,255,0.96)';
+  ctx.fill();
+  ctx.restore();
+
+  // Tampa central
+  ctx.beginPath();
+  ctx.arc(CX, CY, 11, 0, Math.PI * 2);
+  ctx.fillStyle = '#c8d8f0';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(CX, CY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#070c1e';
+  ctx.fill();
+}
+
+function animate() {
+  const d = tgtPsi - curPsi;
+  if (Math.abs(d) > 0.04) {
+    curPsi += d * 0.13;
+    drawGauge(curPsi);
+    raf = requestAnimationFrame(animate);
+  } else {
+    curPsi = tgtPsi;
+    drawGauge(curPsi);
+  }
+}
+
+function setGauge(psi) {
+  tgtPsi = psi;
+  cancelAnimationFrame(raf);
+  animate();
+}
+
+// ── WEBSOCKET ─────────────────────────────────────────────────────────
+let ws;
+function wsConnect() {
+  ws = new WebSocket('ws://' + location.host + '/ws');
+
+  ws.onopen = function() {
+    document.getElementById('sdot').className = 'on';
+    document.getElementById('stxt').textContent = 'Conectado ao ESP32';
+  };
+
+  ws.onmessage = function(e) {
+    try {
+      const d   = JSON.parse(e.data);
+      const pa  = +d.pressure_pa;
+      const tc  = +d.temperature_c;
+      const psi = pa * 0.000145038;
+      const bar = pa / 100000;
+      const kpa = pa / 1000;
+
+      setGauge(psi);
+      document.getElementById('vpsi').textContent = psi.toFixed(2);
+      document.getElementById('vbar').textContent = bar.toFixed(3);
+      document.getElementById('vkpa').textContent = kpa.toFixed(1);
+      document.getElementById('vpa').textContent  = Math.round(pa).toLocaleString('pt-BR');
+      document.getElementById('vtmp').textContent = tc.toFixed(1);
+
+      const ps = document.getElementById('pst');
+      if (psi < 20) {
+        ps.textContent = '⚠ Pneu murcho!';
+        ps.style.cssText = 'background:#2a0808;color:#ff5252;border-color:#ff5252;';
+      } else if (psi < 28) {
+        ps.textContent = '↓ Pressão baixa';
+        ps.style.cssText = 'background:#2a1400;color:#ff9100;border-color:#ff9100;';
+      } else if (psi <= 36) {
+        ps.textContent = '✔ Pressão ideal';
+        ps.style.cssText = 'background:#062010;color:#69f0ae;border-color:#69f0ae;';
+      } else if (psi <= 45) {
+        ps.textContent = '↑ Pressão alta';
+        ps.style.cssText = 'background:#2a1400;color:#ff9100;border-color:#ff9100;';
+      } else {
+        ps.textContent = '⚠ Pressão perigosa!';
+        ps.style.cssText = 'background:#2a0808;color:#ff5252;border-color:#ff5252;';
+      }
+    } catch(err) {}
+  };
+
+  ws.onclose = function() {
+    document.getElementById('sdot').className = 'off';
+    document.getElementById('stxt').textContent = 'Desconectado — reconectando...';
+    setTimeout(wsConnect, 3000);
+  };
+
+  ws.onerror = function() { ws.close(); };
+}
+
+// ── INÍCIO ────────────────────────────────────────────────────────────
+drawGauge(0);
+wsConnect();
+</script>
+</body>
+</html>
