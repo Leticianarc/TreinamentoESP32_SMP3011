@@ -1,0 +1,5 @@
+# As páginas HTML são recursos embarcados no firmware (servidas pelo ESP32),
+# não o código principal do projeto. Sem isto o GitHub classifica o
+# repositório como "HTML" em vez de "C".
+main/*.html linguist-detectable=false
+main/main_source.txt linguist-generated=true
